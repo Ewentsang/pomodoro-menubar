@@ -631,16 +631,13 @@
             });
           }
 
-          // 自动循环：专注后休息；每完成第 4 个专注，进入长休息；
-          // 任一休息结束后，自动开始下一轮专注。
-          const nextMode =
-            finishedMode === "work"
-              ? state.completed % 4 === 0
-                ? "long"
-                : "short"
-              : "work";
-          setMode(nextMode, { hard: true });
-          start();
+          // 自动循环：专注后自动进入休息；每完成第 4 个专注，进入长休息。
+          // 休息结束后停留在界面上，等待用户手动开始下一轮专注。
+          if (finishedMode === "work") {
+            const nextMode = state.completed % 4 === 0 ? "long" : "short";
+            setMode(nextMode, { hard: true });
+            start();
+          }
         }
 
         function celebrate() {
