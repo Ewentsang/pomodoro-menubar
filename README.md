@@ -1,220 +1,82 @@
 <div align="center">
-  <img src="docs/icon.png" alt="Pomodoro" width="128" height="128" />
+  <img src="docs/icon.png" alt="番茄钟图标" width="128" />
 
-# Pomodoro
+# 番茄钟
 
-**A tiny, native macOS menu bar Pomodoro timer.**
+**简体中文 macOS 菜单栏番茄钟**
 
-~176 KB binary · ~1.5 MB DMG · No Electron · Open source · MIT license
-
-[简体中文](#简体中文) · [English](#english) · [Türkçe](#türkçe)
+轻量、原生、无需 Electron · Swift + WebKit · MIT 许可证
 
 </div>
 
----
+## 简介
 
-## 简体中文
+番茄钟常驻在 macOS 菜单栏，实时显示专注或休息的剩余时间。左键点按 🍅 图标可打开计时器，右键点按可调整时长和提醒设置。
 
-这是一个显示在 macOS 菜单栏中的轻量番茄钟。此 Fork 将主界面、右键菜单、通知和语音提醒改为简体中文；为避免被上游版本覆盖，已移除自动更新。
+这是 [onurdilmen/pomodoro-menubar](https://github.com/onurdilmen/pomodoro-menubar) 的简体中文定制版。主界面、右键菜单、通知、语音提醒和首次启动提示均已汉化。
 
-- 菜单栏显示实时倒计时
-- 左键点按 🍅 打开计时器；右键点按可设置时长和提醒
-- `⌘⇧P`：显示或隐藏计时器；`Space`：开始或暂停；`R`：重置
-- 需要 macOS 13 或更高版本
+## 功能
 
-### 从源码安装
+- 🍅 菜单栏实时倒计时，例如 `🍅 24:57`
+- ⏱️ 专注、短休息、长休息三种模式；时长可自定义
+- ⌨️ 全局快捷键 `⌘⇧P`：显示或隐藏计时器
+- 🔔 系统提示音、中文语音提醒和 macOS 通知，可分别开关
+- 🚀 支持登录时自动启动
+- 💾 时长与提醒设置会保存在本机，重启后仍然有效
+- 🌑 深色界面，原生 Swift 外壳，资源占用小
 
-```bash
-git clone git@github.com:YOUR_GITHUB_USER/pomodoro-menubar.git
-cd pomodoro-menubar
-git switch chinese-ui
-./package.sh --install
-```
+## 安装
 
-首次打开时，如 macOS 提示未识别开发者，请前往“系统设置 → 隐私与安全性”并选择“仍要打开”。请从本 Fork 的 Releases 页面获取更新。
+### 下载已构建版本
 
-## English
+1. 前往本仓库的 [Releases](../../releases) 页面，下载最新的 `Pomodoro-*.dmg`。
+2. 打开 DMG，将 `Pomodoro.app` 拖入“应用程序”文件夹。
+3. 首次打开若被 macOS 拦截：前往“系统设置 → 隐私与安全性”，在安全性提示旁选择“仍要打开”。
+4. 在菜单栏找到 `🍅 25:00`：左键打开计时器，右键打开设置。
 
-A focused Pomodoro timer that lives in your macOS menu bar. Built natively in Swift with a WebKit-rendered UI — combining the design flexibility of HTML/CSS with the lightness and feel of a native macOS app.
+> 本项目为个人开源构建，未使用 Apple 开发者证书公证；首次启动出现系统安全提示是正常现象。
 
-### Features
+### 从源码构建
 
-- 🍅 **Live countdown in the status bar** (`🍅 24:57`)
-- ⏱️ **Three modes** with customizable durations: Work / Short Break / Long Break
-- ⌨️ **Global hotkey** `⌘⇧P` toggles the popover from anywhere
-- 🔔 **Three completion signals** — system sound, Turkish text-to-speech, native macOS notification (each can be toggled)
-- 🚀 **Auto-start at login** via macOS `SMAppService` (one click in the right-click menu)
-- 💾 **Persistent settings** — your durations and toggles survive restarts
-- 🌑 **Dark mode by default** — Linear/Vercel-style minimal dark theme
-- 🔄 **Auto-update via Sparkle** — daily check for new versions; right-click menu has manual "Check for Updates…"
-- 📐 **~4 MB .app, ~3 MB DMG** — Electron equivalent would be ~150 MB
-
-### Installation
-
-#### Option 1: Download the DMG (recommended for users)
-
-1. Download the latest `Pomodoro-x.y.z.dmg` from [Releases](https://github.com/onurdilmen/pomodoro-menubar/releases/latest)
-2. Open the DMG and drag **Pomodoro** to **Applications**
-3. **First launch — pick the path that matches your macOS version:**
-
-   **macOS Sonoma (14) and earlier**
-   - In Applications, **right-click** `Pomodoro.app` → **Open** → click **Open** in the dialog.
-
-   **macOS Sequoia (15) and later** _(Apple removed the right-click bypass)_
-   - Try to open the app once (it will be blocked).
-   - Open **System Settings → Privacy & Security**, scroll to **Security**.
-   - You'll see _"Pomodoro was blocked because it is not from an identified developer."_ → click **Open Anyway**, enter your password.
-   - Try opening the app again — now it works.
-
-   **Fallback (any version, terminal):**
-
-   ```bash
-   xattr -d com.apple.quarantine /Applications/Pomodoro.app
-   ```
-
-4. The app appears in your menu bar as `🍅 25:00`. **Left-click** to open the timer; **right-click** for settings.
-
-> **Why the warning?** This app is not signed with a paid Apple Developer ID ($99/year). The code is open source and you can audit it. After the first manual approval, macOS remembers your decision and the warning never appears again.
-
-#### Option 2: Build from source
-
-Requires macOS 13+ and Xcode Command Line Tools (no full Xcode needed).
+需要 macOS 13 或更高版本，以及 Xcode Command Line Tools。
 
 ```bash
-git clone https://github.com/onurdilmen/pomodoro-menubar.git
+git clone git@github.com:Ewentsang/pomodoro-menubar.git
 cd pomodoro-menubar
 ./package.sh --install
 ```
 
-This builds the app, generates the icon, copies to `/Applications/`, and launches it.
-
-### Keyboard shortcuts
-
-| Shortcut | Action                                  |
-| -------- | --------------------------------------- |
-| `⌘⇧P`    | Toggle popover (works globally)         |
-| `Space`  | Start / Pause (when popover is focused) |
-| `R`      | Reset (when popover is focused)         |
-| `⌘Q`     | Quit (from menu)                        |
-
-### Right-click menu
-
-Right-click the menu bar icon to access:
-
-- **Durations**: Work (15–90 min), Short Break (3–15 min), Long Break (10–30 min)
-- **Notifications**: System sound, Turkish text-to-speech, Mac notification (each toggleable)
-- **Test notification**: trigger all three at once
-- **Auto-start at login**: enable / disable
-- **Quit**: ⌘Q
-
-### Architecture
-
-Hybrid native shell + WebKit content — same pattern used by Notion, Slack, GitHub Desktop, and Stripe (but much lighter).
-
-```
-┌─────────────────────────────────┐
-│  macOS menu bar (NSStatusItem)  │
-└────────────────┬────────────────┘
-                 │
-        ┌────────▼────────┐
-        │   NSPopover     │
-        └────────┬────────┘
-                 │
-        ┌────────▼────────┐
-        │    WKWebView    │  ← Linear/Vercel-style HTML UI
-        └─────────────────┘
-                 │
-                 │ MutationObserver → WKScriptMessageHandler
-                 │
-            ┌────▼────────────────────────┐
-            │  Native: NSSound,           │
-            │  AVSpeechSynthesizer,       │
-            │  UNUserNotificationCenter,  │
-            │  Carbon RegisterEventHotKey │
-            └─────────────────────────────┘
-```
-
-Key components:
-
-- **`NSStatusItem` + `NSPopover`** — the native menu bar shell
-- **`WKWebView`** — renders the HTML/CSS/JS UI (designed in [Open Design](https://github.com/nexu-io/open-design))
-- **`WKScriptMessageHandler`** — bridges DOM events to Swift; status bar countdown is push-based via `MutationObserver` (not polling)
-- **`AVSpeechSynthesizer`** — Turkish-first TTS (`tr-TR`, falls back to `en-US`)
-- **`UNUserNotificationCenter`** — native macOS notifications (requires `.app` bundle, not just a binary)
-- **`Carbon RegisterEventHotKey`** — system-wide `⌘⇧P` hotkey without requesting Accessibility permission
-- **`SMAppService`** — modern macOS 13+ login items API
-
-### Build commands
+常用命令：
 
 ```bash
-./package.sh                  # Release build + .app bundle
-./package.sh --install        # build + copy to /Applications/ + restart
-./package.sh --icon           # regenerate AppIcon.icns
-./package.sh --dmg            # build + DMG installer
-./package.sh --all            # icon + build + install + DMG
-./package.sh -h               # help
+./package.sh            # 构建 Pomodoro.app
+./package.sh --install  # 构建、安装到 /Applications 并启动
+./package.sh --dmg      # 构建 DMG 安装包
 ```
 
-The icon is generated programmatically from `icon-gen.swift` — no external image assets needed.
+## 使用方法
 
-### License
+| 操作 | 方法 |
+| --- | --- |
+| 打开或关闭计时器面板 | 左键点按菜单栏图标，或按 `⌘⇧P` |
+| 开始 / 暂停 | 点按按钮，或在面板内按 `Space` |
+| 重置当前计时 | 点按“重置”，或在面板内按 `R` |
+| 切换专注与休息模式 | 点按面板顶部的模式标签 |
+| 调整时长、提醒与自动启动 | 右键点按菜单栏图标 |
 
-MIT — see [LICENSE](LICENSE).
+默认时长为：专注 25 分钟、短休息 5 分钟、长休息 15 分钟。
 
-### Credits
+## 发布新版本
 
-- Pomodoro UI designed in **[Open Design](https://github.com/nexu-io/open-design)** (an open-source local-first alternative to Anthropic's Claude Design).
-- Built with **Claude Code** as a pair-programming exercise — the entire Swift host, WebKit bridge, native completion engine, and packaging pipeline came together in a single afternoon.
-
----
-
-## Türkçe
-
-Menü çubuğunda yaşayan, native macOS Pomodoro zamanlayıcısı. Swift ile yazıldı, arayüz WebKit tarafından render ediliyor — HTML/CSS tasarım esnekliği + native uygulama hafifliği bir arada.
-
-### Özellikler
-
-- 🍅 **Menü çubuğunda canlı geri sayım** (`🍅 24:57`)
-- ⏱️ **Üç mod**: Çalışma / Kısa Mola / Uzun Mola — süreler özelleştirilebilir
-- ⌨️ **Global kısayol** `⌘⇧P` her yerden popover'ı aç/kapat
-- 🔔 **Üç tip bildirim** — sistem sesi, Türkçe sesli okuma, macOS native bildirim (her biri açıp/kapanabilir)
-- 🚀 **Mac açılışında otomatik başlat** — sağ tık menüsünden tek tıkla
-- 💾 **Tercihler kalıcı** — süre ve toggle ayarları yeniden başlatmadan sonra korunur
-- 🌑 **Koyu tema** — Linear/Vercel tarzı minimal koyu arayüz
-- 🔄 **Sparkle ile otomatik güncelleme** — günlük kontrol; sağ tık menüsünde "Güncellemeleri kontrol et"
-- 📐 **~4 MB .app, ~3 MB DMG** — Electron alternatifi olsa ~150 MB olurdu
-
-### Kurulum
-
-1. [Releases](https://github.com/onurdilmen/pomodoro-menubar/releases/latest) sayfasından son sürüm `Pomodoro-x.y.z.dmg`'i indir
-2. DMG'yi aç, **Pomodoro**'yu **Applications**'a sürükle
-3. **İlk açılış — macOS sürümüne göre:**
-
-   **macOS Sonoma (14) ve öncesi**
-   - Applications'ta `Pomodoro.app`'e **sağ tık** → **Aç** → diyalogtan **Aç**.
-
-   **macOS Sequoia (15) ve sonrası** _(Apple sağ tık bypass'ini kaldırdı)_
-   - Uygulamayı bir kez aç (engellenecek).
-   - **Sistem Ayarları → Gizlilik ve Güvenlik**'i aç, **Güvenlik** bölümüne in.
-   - _"Pomodoro tanımlı bir geliştiriciden olmadığı için engellendi"_ satırını gör → **Yine de Aç** → şifre.
-   - Tekrar aç — bu sefer çalışır.
-
-   **Alternatif (tüm sürümler, terminal):**
-
-   ```bash
-   xattr -d com.apple.quarantine /Applications/Pomodoro.app
-   ```
-
-4. Menü çubuğunda `🍅 25:00` görünür. **Sol tık** → zamanlayıcı; **sağ tık** → ayarlar.
-
-### Kaynak koddan derle
+推送形如 `v1.0.0` 的标签后，GitHub Actions 会自动构建 DMG 并创建 Release：
 
 ```bash
-git clone https://github.com/onurdilmen/pomodoro-menubar.git
-cd pomodoro-menubar
-./package.sh --install
+git tag -a v1.0.0 -m "发布 v1.0.0"
+git push origin v1.0.0
 ```
 
-### Lisans
+为避免中文版本被上游版本覆盖，本 Fork 不启用上游的自动更新功能；请从本仓库的 Releases 页面获取新版本。
 
-MIT — bkz. [LICENSE](LICENSE).
+## 开源许可与致谢
+
+本项目遵循 [MIT License](LICENSE)。原项目由 [Onur Dilmen](https://github.com/onurdilmen) 创建；本 Fork 在保留原始版权与许可证的前提下，提供简体中文界面与发布流程。
