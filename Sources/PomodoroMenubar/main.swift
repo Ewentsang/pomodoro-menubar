@@ -161,6 +161,11 @@ final class WebViewController: NSViewController, WKNavigationDelegate {
         webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
+    func startWorkSession() {
+        let js = "if (window.__startWorkSession) window.__startWorkSession();"
+        webView?.evaluateJavaScript(js, completionHandler: nil)
+    }
+
     private func measureAndReportSize() {
         let js = "Math.max(document.documentElement.scrollHeight, document.body.scrollHeight)"
         webView?.evaluateJavaScript(js) { [weak self] result, _ in
@@ -271,9 +276,9 @@ enum LoginItem {
 // MARK: - Global hotkey (Carbon RegisterEventHotKey)
 
 final class GlobalHotKey {
-    private var ref: EventHotKeyRef?
+    private var refs: [UInt32: EventHotKeyRef] = [:]
     private var handler: EventHandlerRef?
-    var onPress: (() -> Void)?
+    var onPress: ((UInt32) -> Void)?
 
     init() {
         var spec = EventTypeSpec(
@@ -283,10 +288,22 @@ final class GlobalHotKey {
         let opaque = Unmanaged.passUnretained(self).toOpaque()
         InstallEventHandler(
             GetApplicationEventTarget(),
-            { _, _, userData -> OSStatus in
+            { _, event, userData -> OSStatus in
                 if let userData = userData {
                     let me = Unmanaged<GlobalHotKey>.fromOpaque(userData).takeUnretainedValue()
-                    DispatchQueue.main.async { me.onPress?() }
+                    var id = EventHotKeyID()
+                    let status = GetEventParameter(
+                        event,
+                        EventParamName(kEventParamDirectObject),
+                        EventParamType(typeEventHotKeyID),
+                        nil,
+                        MemoryLayout<EventHotKeyID>.size,
+                        nil,
+                        &id
+                    )
+                    if status == noErr {
+                        DispatchQueue.main.async { me.onPress?(id.id) }
+                    }
                 }
                 return noErr
             },
@@ -297,32 +314,38 @@ final class GlobalHotKey {
         )
     }
 
-    func register(keyCode: UInt32, modifiers: UInt32) {
-        unregister()
+    func register(id: UInt32, keyCode: UInt32, modifiers: UInt32) {
+        unregister(id: id)
         var hotKeyRef: EventHotKeyRef?
-        let id = EventHotKeyID(signature: fourCharCode("PmHK"), id: 1)
+        let hotKeyID = EventHotKeyID(signature: fourCharCode("PmHK"), id: id)
         let status = RegisterEventHotKey(
             keyCode,
             modifiers,
-            id,
+            hotKeyID,
             GetApplicationEventTarget(),
             0,
             &hotKeyRef
         )
-        if status == noErr {
-            ref = hotKeyRef
+        if status == noErr, let hotKeyRef {
+            refs[id] = hotKeyRef
         }
     }
 
-    func unregister() {
-        if let ref = ref {
+    func unregister(id: UInt32) {
+        if let ref = refs.removeValue(forKey: id) {
             UnregisterEventHotKey(ref)
         }
-        ref = nil
+    }
+
+    func unregisterAll() {
+        for ref in refs.values {
+            UnregisterEventHotKey(ref)
+        }
+        refs.removeAll()
     }
 
     deinit {
-        unregister()
+        unregisterAll()
         if let handler = handler {
             RemoveEventHandler(handler)
         }
@@ -380,13 +403,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // İlk açılışta Türkçe karşılama
         showWelcomeIfNeeded()
 
-        // Global hotkey: ⌘⇧P → popover toggle
-        hotKey.onPress = { [weak self] in
-            self?.togglePopover()
+        // 全局快捷键：⌘⇧P 显示/隐藏面板；⌥⌘T 立即开始一轮专注。
+        hotKey.onPress = { [weak self] id in
+            switch id {
+            case 1:
+                self?.togglePopover()
+            case 2:
+                self?.webController.startWorkSession()
+            default:
+                break
+            }
         }
         hotKey.register(
+            id: 1,
             keyCode: UInt32(kVK_ANSI_P),
             modifiers: UInt32(cmdKey | shiftKey)
+        )
+        hotKey.register(
+            id: 2,
+            keyCode: UInt32(kVK_ANSI_T),
+            modifiers: UInt32(cmdKey | optionKey)
         )
     }
 
@@ -489,7 +525,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(loginItem)
 
         let hotkeyHint = NSMenuItem(
-            title: "快捷键：⌘⇧P（显示 / 隐藏面板）",
+            title: "快捷键：⌘⇧P 显示面板；⌥⌘T 开始专注",
             action: nil,
             keyEquivalent: ""
         )
@@ -562,6 +598,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             • 左键点按 → 打开计时器面板
             • 右键点按 → 设置时长、提醒和自动启动
             • ⌘⇧P → 随时显示 / 隐藏面板
+            • ⌥⌘T → 随时开始一轮专注
 
             这是中文定制版；更新请从此项目的发布页面获取。
             """

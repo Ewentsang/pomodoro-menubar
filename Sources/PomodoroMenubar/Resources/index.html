@@ -570,6 +570,12 @@
           render();
         }
 
+        // 供原生全局快捷键 ⌥⌘T 调用：开始一轮全新的专注。
+        window.__startWorkSession = function () {
+          setMode("work", { hard: true });
+          start();
+        };
+
         function pause() {
           if (!state.running) return;
           clearInterval(state.intervalId);
