@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -363,8 +363,8 @@
       <header>
         <div class="brand" aria-label="Pomodoro">
           <span class="brand-dot" aria-hidden="true"></span>
-          <span>pomodoro</span>
-          <small>· focus timer</small>
+          <span>番茄钟</span>
+          <small>· 专注计时器</small>
         </div>
         <div class="counter" id="counter" aria-live="polite">
           <span aria-hidden="true">🍅</span>
@@ -374,9 +374,9 @@
       </header>
 
       <main>
-        <div class="tabs" role="tablist" aria-label="Mod seçimi">
+        <div class="tabs" role="tablist" aria-label="模式选择">
           <button class="tab" role="tab" data-mode="work" aria-selected="true">
-            Çalışma <span class="min">25dk</span>
+            专注 <span class="min">25 分钟</span>
           </button>
           <button
             class="tab"
@@ -384,10 +384,10 @@
             data-mode="short"
             aria-selected="false"
           >
-            Kısa Mola <span class="min">5dk</span>
+            短休息 <span class="min">5 分钟</span>
           </button>
           <button class="tab" role="tab" data-mode="long" aria-selected="false">
-            Uzun Mola <span class="min">15dk</span>
+            长休息 <span class="min">15 分钟</span>
           </button>
         </div>
 
@@ -412,20 +412,20 @@
           </svg>
           <div class="ring-center">
             <div class="time" id="time" aria-live="off">25:00</div>
-            <div class="mode-label" id="modeLabel">Çalışma</div>
+            <div class="mode-label" id="modeLabel">专注</div>
           </div>
         </div>
 
-        <div class="controls" role="group" aria-label="Kontroller">
-          <button class="btn btn--primary" id="startBtn">Başlat</button>
-          <button class="btn" id="pauseBtn" disabled>Duraklat</button>
-          <button class="btn btn--ghost" id="resetBtn">Sıfırla</button>
+        <div class="controls" role="group" aria-label="计时器控制">
+          <button class="btn btn--primary" id="startBtn">开始</button>
+          <button class="btn" id="pauseBtn" disabled>暂停</button>
+          <button class="btn btn--ghost" id="resetBtn">重置</button>
         </div>
       </main>
 
       <footer>
-        <span><kbd>Space</kbd> başlat / duraklat</span>
-        <span><kbd>R</kbd> sıfırla</span>
+        <span><kbd>Space</kbd> 开始 / 暂停</span>
+        <span><kbd>R</kbd> 重置</span>
       </footer>
     </div>
 
@@ -434,9 +434,9 @@
         "use strict";
 
         const MODES = {
-          work: { duration: 25 * 60, label: "Çalışma", short: "Çalışma" },
-          short: { duration: 5 * 60, label: "Kısa Mola", short: "Kısa Mola" },
-          long: { duration: 15 * 60, label: "Uzun Mola", short: "Uzun Mola" },
+          work: { duration: 25 * 60, label: "专注", short: "专注" },
+          short: { duration: 5 * 60, label: "短休息", short: "短休息" },
+          long: { duration: 15 * 60, label: "长休息", short: "长休息" },
         };
 
         // Native köprü — Swift menubar uygulaması süreleri runtime'da değiştirebilir

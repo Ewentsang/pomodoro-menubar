@@ -21,10 +21,10 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleDevelopmentRegion</key>
-    <string>tr</string>
+    <string>zh-Hans</string>
     <key>CFBundleLocalizations</key>
     <array>
-        <string>tr</string>
+        <string>zh-Hans</string>
         <string>en</string>
     </array>
     <key>LSMinimumSystemVersion</key>
@@ -35,15 +35,5 @@
     <true/>
     <key>NSHumanReadableCopyright</key>
     <string>© 2026 Onur Dilmen</string>
-
-    <!-- Sparkle auto-update settings -->
-    <key>SUFeedURL</key>
-    <string>https://onurdilmen.github.io/pomodoro-menubar/appcast.xml</string>
-    <key>SUPublicEDKey</key>
-    <string>lV/FwOlYc/a8Ufalez9r4DykmZcitT3eqannpDyuRHM=</string>
-    <key>SUEnableAutomaticChecks</key>
-    <true/>
-    <key>SUScheduledCheckInterval</key>
-    <integer>86400</integer>
 </dict>
 </plist>

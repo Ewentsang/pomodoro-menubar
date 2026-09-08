@@ -2,7 +2,6 @@ import AppKit
 import AVFoundation
 import Carbon
 import ServiceManagement
-import Sparkle
 import UserNotifications
 import WebKit
 
@@ -101,7 +100,7 @@ final class WebViewController: NSViewController, WKNavigationDelegate {
             const get = (id) => document.getElementById(id)?.textContent?.trim() ?? '';
             window.webkit.messageHandlers.tick.postMessage({
               time: get('time'),
-              mode: get('modeLabel'),
+              mode: document.querySelector('.tab[aria-selected="true"]')?.dataset.mode ?? 'work',
               count: get('counterNum'),
             });
           }
@@ -186,16 +185,16 @@ final class CompletionEngine {
         let soundName: String
         switch finishedMode {
         case "work":
-            nextHint = "Pomodoro tamam. Şimdi biraz soluklan."
+            nextHint = "本轮专注已完成。休息一下吧。"
             soundName = "Hero"
         case "short":
-            nextHint = "Kısa mola bitti. Yeniden odaklanma zamanı."
+            nextHint = "短休息结束。准备继续专注。"
             soundName = "Glass"
         case "long":
-            nextHint = "Uzun mola bitti. Yeni pomodoro başlasın."
+            nextHint = "长休息结束。开始新一轮专注吧。"
             soundName = "Glass"
         default:
-            nextHint = "Pomodoro turu tamamlandı."
+            nextHint = "番茄钟已完成。"
             soundName = "Glass"
         }
 
@@ -206,7 +205,7 @@ final class CompletionEngine {
             speak(nextHint)
         }
         if Settings.notificationEnabled {
-            sendNotification(title: "🍅 Pomodoro tamam", body: nextHint)
+            sendNotification(title: "🍅 番茄钟完成", body: nextHint)
         }
     }
 
@@ -215,7 +214,8 @@ final class CompletionEngine {
             synthesizer.stopSpeaking(at: .immediate)
         }
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+        utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
+            ?? AVSpeechSynthesisVoice(language: "zh-TW")
             ?? AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
         utterance.volume = 0.9
@@ -259,11 +259,11 @@ enum LoginItem {
 
     static var statusLabel: String {
         switch SMAppService.mainApp.status {
-        case .enabled: return "etkin"
-        case .notRegistered: return "kapalı"
-        case .requiresApproval: return "onay gerekli (Sistem Ayarları)"
-        case .notFound: return "bulunamadı"
-        @unknown default: return "bilinmiyor"
+        case .enabled: return "已开启"
+        case .notRegistered: return "已关闭"
+        case .requiresApproval: return "需要在“系统设置”中批准"
+        case .notFound: return "不可用"
+        @unknown default: return "未知"
         }
     }
 }
@@ -345,11 +345,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let webController = WebViewController()
     private let completion = CompletionEngine()
     private let hotKey = GlobalHotKey()
-    private let updaterController = SPUStandardUpdaterController(
-        startingUpdater: true,
-        updaterDelegate: nil,
-        userDriverDelegate: nil
-    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -419,8 +414,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStatusBar(time: String, mode: String) {
         let icon: String
         switch mode {
-        case "Çalışma": icon = "🍅"
-        case "Kısa Mola", "Uzun Mola": icon = "☕"
+        case "work": icon = "🍅"
+        case "short", "long": icon = "☕"
         default: icon = "⏱"
         }
         statusItem.button?.title = "\(icon) \(time)"
@@ -435,46 +430,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showSettingsMenu() {
         let menu = NSMenu()
 
-        menu.addItem(NSMenuItem.sectionHeader(title: "Süreler"))
+        menu.addItem(NSMenuItem.sectionHeader(title: "时长"))
         menu.addItem(durationSubmenu(
-            title: "Çalışma",
+            title: "专注",
             options: [15, 20, 25, 30, 45, 60, 90],
             current: Settings.workMinutes,
             apply: { Settings.workMinutes = $0 }
         ))
         menu.addItem(durationSubmenu(
-            title: "Kısa Mola",
+            title: "短休息",
             options: [3, 5, 7, 10, 15],
             current: Settings.shortMinutes,
             apply: { Settings.shortMinutes = $0 }
         ))
         menu.addItem(durationSubmenu(
-            title: "Uzun Mola",
+            title: "长休息",
             options: [10, 15, 20, 25, 30],
             current: Settings.longMinutes,
             apply: { Settings.longMinutes = $0 }
         ))
 
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem.sectionHeader(title: "Bildirimler"))
+        menu.addItem(NSMenuItem.sectionHeader(title: "提醒"))
         menu.addItem(toggleItem(
-            title: "Sistem sesi (Glass)",
+            title: "系统提示音 (Glass)",
             isOn: Settings.soundEnabled,
             action: #selector(toggleSound)
         ))
         menu.addItem(toggleItem(
-            title: "Sesli okuma (Türkçe TTS)",
+            title: "中文语音提醒",
             isOn: Settings.voiceEnabled,
             action: #selector(toggleVoice)
         ))
         menu.addItem(toggleItem(
-            title: "Mac bildirimi",
+            title: "macOS 通知",
             isOn: Settings.notificationEnabled,
             action: #selector(toggleNotification)
         ))
 
         let testItem = NSMenuItem(
-            title: "Bildirimi test et",
+            title: "测试提醒",
             action: #selector(testNotification),
             keyEquivalent: ""
         )
@@ -482,10 +477,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(testItem)
 
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem.sectionHeader(title: "Sistem"))
+        menu.addItem(NSMenuItem.sectionHeader(title: "系统"))
 
         let loginItem = NSMenuItem(
-            title: "Mac açılışında otomatik başlat (\(LoginItem.statusLabel))",
+            title: "登录时自动启动 (\(LoginItem.statusLabel))",
             action: #selector(toggleLoginItem),
             keyEquivalent: ""
         )
@@ -494,24 +489,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(loginItem)
 
         let hotkeyHint = NSMenuItem(
-            title: "Kısayol: ⌘⇧P (popover aç/kapat)",
+            title: "快捷键：⌘⇧P（显示 / 隐藏面板）",
             action: nil,
             keyEquivalent: ""
         )
         hotkeyHint.isEnabled = false
         menu.addItem(hotkeyHint)
 
-        let checkUpdate = NSMenuItem(
-            title: "Güncellemeleri kontrol et…",
-            action: #selector(checkForUpdates),
-            keyEquivalent: ""
-        )
-        checkUpdate.target = self
-        menu.addItem(checkUpdate)
-
         menu.addItem(NSMenuItem.separator())
         let quit = NSMenuItem(
-            title: "Pomodoro'dan Çık",
+            title: "退出番茄钟",
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -528,11 +515,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         current: Int,
         apply: @escaping (Int) -> Void
     ) -> NSMenuItem {
-        let item = NSMenuItem(title: "\(title): \(current) dk", action: nil, keyEquivalent: "")
+        let item = NSMenuItem(title: "\(title)：\(current) 分钟", action: nil, keyEquivalent: "")
         let submenu = NSMenu()
         for value in options {
             let sub = NSMenuItem(
-                title: "\(value) dakika",
+                title: "\(value) 分钟",
                 action: #selector(durationSelected(_:)),
                 keyEquivalent: ""
             )
@@ -563,27 +550,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func toggleNotification() { Settings.notificationEnabled.toggle() }
     @objc private func toggleLoginItem() { LoginItem.toggle() }
 
-    @objc private func checkForUpdates() {
-        updaterController.checkForUpdates(nil)
-    }
-
     private func showWelcomeIfNeeded() {
         guard !Settings.welcomeShown else { return }
         // applicationDidFinishLaunching tamamlandıktan sonra göster (status item önce çizilsin)
         DispatchQueue.main.async { [weak self] in
             let alert = NSAlert()
-            alert.messageText = "Pomodoro'ya hoş geldin 🍅"
+            alert.messageText = "欢迎使用番茄钟 🍅"
             alert.informativeText = """
-            Pomodoro şimdi menü çubuğunda — sağ üstteki 🍅 simgesini ara.
+            番茄钟已显示在菜单栏中——请在右上角查找 🍅 图标。
 
-            • Sol tık → zamanlayıcı popover'ı
-            • Sağ tık → ayarlar: süreler, bildirimler, otomatik başlatma
-            • ⌘⇧P → her yerden popover'ı aç/kapat
+            • 左键点按 → 打开计时器面板
+            • 右键点按 → 设置时长、提醒和自动启动
+            • ⌘⇧P → 随时显示 / 隐藏面板
 
-            Yeni sürümler otomatik bildirilir; \"Şimdi Yükle\" diyerek tek tıkla güncellenirsin.
+            这是中文定制版；更新请从此项目的发布页面获取。
             """
             alert.alertStyle = .informational
-            alert.addButton(withTitle: "Anladım")
+            alert.addButton(withTitle: "知道了")
             NSApp.activate(ignoringOtherApps: true)
             alert.runModal()
             Settings.welcomeShown = true

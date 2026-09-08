@@ -83,26 +83,14 @@ else
     exit 1
 fi
 
-# Sparkle.framework bundle'a göm + rpath ayarla
-SPARKLE_FW="$BUILD_DIR/Sparkle.framework"
-if [[ -d "$SPARKLE_FW" ]]; then
-    cp -R "$SPARKLE_FW" "$APP_DIR/Contents/Frameworks/"
-    # SwiftPM @rpath'i otomatik eklemiyor — manuel ekle
-    install_name_tool -add_rpath "@executable_path/../Frameworks" \
-        "$APP_DIR/Contents/MacOS/$BIN_NAME" 2>/dev/null || true
-else
-    echo "Uyarı: Sparkle.framework bulunamadı: $SPARKLE_FW" >&2
-fi
-
 cp Info.plist "$APP_DIR/Contents/Info.plist"
 
-# Localization marker'ları — Sparkle ve sistem app'in dil destek listesini buradan
-# okur. tr.lproj boş olabilir, sadece "Türkçeyi destekliyorum" sinyali gönderiyor.
-mkdir -p "$APP_DIR/Contents/Resources/tr.lproj"
+# Localization marker'ları — sistem app'in dil destek listesini buradan okur.
+mkdir -p "$APP_DIR/Contents/Resources/zh-Hans.lproj"
 mkdir -p "$APP_DIR/Contents/Resources/en.lproj"
-cat > "$APP_DIR/Contents/Resources/tr.lproj/InfoPlist.strings" <<'PLIST'
-"CFBundleName" = "Pomodoro";
-"CFBundleDisplayName" = "Pomodoro";
+cat > "$APP_DIR/Contents/Resources/zh-Hans.lproj/InfoPlist.strings" <<'PLIST'
+"CFBundleName" = "番茄钟";
+"CFBundleDisplayName" = "番茄钟";
 PLIST
 cat > "$APP_DIR/Contents/Resources/en.lproj/InfoPlist.strings" <<'PLIST'
 "CFBundleName" = "Pomodoro";

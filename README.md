@@ -7,11 +7,31 @@
 
 ~176 KB binary · ~1.5 MB DMG · No Electron · Open source · MIT license
 
-[English](#english) · [Türkçe](#türkçe)
+[简体中文](#简体中文) · [English](#english) · [Türkçe](#türkçe)
 
 </div>
 
 ---
+
+## 简体中文
+
+这是一个显示在 macOS 菜单栏中的轻量番茄钟。此 Fork 将主界面、右键菜单、通知和语音提醒改为简体中文；为避免被上游版本覆盖，已移除自动更新。
+
+- 菜单栏显示实时倒计时
+- 左键点按 🍅 打开计时器；右键点按可设置时长和提醒
+- `⌘⇧P`：显示或隐藏计时器；`Space`：开始或暂停；`R`：重置
+- 需要 macOS 13 或更高版本
+
+### 从源码安装
+
+```bash
+git clone git@github.com:YOUR_GITHUB_USER/pomodoro-menubar.git
+cd pomodoro-menubar
+git switch chinese-ui
+./package.sh --install
+```
+
+首次打开时，如 macOS 提示未识别开发者，请前往“系统设置 → 隐私与安全性”并选择“仍要打开”。请从本 Fork 的 Releases 页面获取更新。
 
 ## English
 
