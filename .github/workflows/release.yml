@@ -1,117 +1,57 @@
-name: Release
+name: Release Chinese edition
 
 on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   release:
-    name: Build, sign, publish, update appcast
+    name: Build and publish DMG
     runs-on: macos-15
+
     steps:
-      - name: Checkout
+      - name: Check out source
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Determine VERSION from tag
+      - name: Determine version
         id: version
         env:
           REF: ${{ github.ref_name }}
         run: |
           VERSION="${REF#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "VERSION=$VERSION"
 
-      - name: Build .app + DMG
+      - name: Build .app and DMG
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: ./package.sh --dmg
 
-      - name: Verify artifact
+      - name: Verify and upload build artifact
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           ls -la "Pomodoro-${VERSION}.dmg"
           du -h "Pomodoro-${VERSION}.dmg"
 
-      - name: Download Sparkle CLI tools
-        run: |
-          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/2.9.1/Sparkle-2.9.1.tar.xz" \
-              -o /tmp/sparkle.tar.xz
-          mkdir -p /tmp/sparkle
-          tar -xf /tmp/sparkle.tar.xz -C /tmp/sparkle
-
-      - name: Sign DMG with Sparkle EdDSA key
-        id: sign
-        env:
-          SPARKLE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          KEY_FILE=$(mktemp)
-          printf '%s' "$SPARKLE_KEY" > "$KEY_FILE"
-          DMG="Pomodoro-${VERSION}.dmg"
-          # sign_update prints: sparkle:edSignature="..." length="..."
-          SIGN_LINE=$(/tmp/sparkle/bin/sign_update -f "$KEY_FILE" "$DMG")
-          rm -f "$KEY_FILE"
-          ED_SIG=$(printf '%s' "$SIGN_LINE" | sed -E 's/.*sparkle:edSignature="([^"]+)".*/\1/')
-          LEN=$(printf '%s' "$SIGN_LINE" | sed -E 's/.*length="([^"]+)".*/\1/')
-          echo "ed_signature=$ED_SIG" >> "$GITHUB_OUTPUT"
-          echo "length=$LEN" >> "$GITHUB_OUTPUT"
-
-      - name: Update docs/appcast.xml on main
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          TAG: ${{ github.ref_name }}
-          ED_SIG: ${{ steps.sign.outputs.ed_signature }}
-          LEN: ${{ steps.sign.outputs.length }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Tag commit'te değiliz, main'e geçip orada güncelliyoruz.
-          # update_appcast.py CHANGELOG.md ve docs/appcast.xml okur,
-          # ikisi de main'in tip'inde olur — tag commit'in dosyalarına
-          # bağımlı değiliz.
-          git fetch origin main
-          git checkout main
-          git pull --rebase origin main
-          python3 scripts/update_appcast.py "$VERSION" "$TAG" "$ED_SIG" "$LEN"
-          git add docs/appcast.xml docs/release-notes/
-          if git diff --cached --quiet; then
-            echo "No appcast changes to commit"
-          else
-            git commit -m "chore: update appcast.xml for v${VERSION}"
-            git push origin main
-          fi
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pomodoro-DMG
+          path: Pomodoro-${{ steps.version.outputs.version }}.dmg
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
-          TAG: ${{ github.ref_name }}
         run: |
-          DMG="Pomodoro-${VERSION}.dmg"
-          if [ -f CHANGELOG.md ]; then
-            NOTES=$(awk -v v="$VERSION" '
-              $0 ~ "^## \\[" v "\\]" {flag=1; print; next}
-              flag && /^## \[/ {flag=0}
-              flag {print}
-            ' CHANGELOG.md)
-            if [ -z "$NOTES" ]; then
-              NOTES="Release $TAG"
-            fi
-          else
-            NOTES="Release $TAG"
-          fi
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$DMG" --clobber
-          else
-            printf '%s\n' "$NOTES" | gh release create "$TAG" "$DMG" \
-              --title "$TAG" \
-              --notes-file -
-          fi
+          gh release create "$GITHUB_REF_NAME" "Pomodoro-${VERSION}.dmg" \
+            --title "番茄钟 ${VERSION}" \
+            --notes "简体中文定制版：主界面、菜单、通知与语音提醒均已汉化。"
