@@ -617,14 +617,24 @@
             saveCompleted();
             celebrate();
           }
-          // Native köprü — Swift app dinliyor olabilir
+          // 通知原生应用播放提示音、语音和系统通知。
           if (window.webkit?.messageHandlers?.complete) {
             window.webkit.messageHandlers.complete.postMessage({
               from: finishedMode,
               count: state.completed,
             });
           }
-          render();
+
+          // 自动循环：专注后休息；每完成第 4 个专注，进入长休息；
+          // 任一休息结束后，自动开始下一轮专注。
+          const nextMode =
+            finishedMode === "work"
+              ? state.completed % 4 === 0
+                ? "long"
+                : "short"
+              : "work";
+          setMode(nextMode, { hard: true });
+          start();
         }
 
         function celebrate() {
